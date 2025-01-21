@@ -1,6 +1,7 @@
 "use server"
 
 import { z } from "zod"
+import { cookies } from "next/headers"
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -42,6 +43,14 @@ export async function loginUser(formData: FormData) {
 
     const data = await response.json()
 
+    // Set authentication cookie
+    cookies().set("auth-token", data.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60, // 1 week
+    })
+
     return {
       success: true,
       data,
@@ -50,6 +59,13 @@ export async function loginUser(formData: FormData) {
     return {
       error: "An error occurred during login",
     }
+  }
+}
+
+export async function logoutUser() {
+  cookies().delete("auth-token")
+  return {
+    success: true,
   }
 }
 

@@ -45,7 +45,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left side - Form */}
-      <div className="flex-1 flex flex-col justify-center p-8 lg:p-12 bg-[#0B0B14] bg-gradient-to-br from-[#0B0B14] to-[#1a1a2e]">
+      <div className="flex-1 flex flex-col justify-center p-8 lg:p-12 bg-[#0B0B14]">
         <div className="w-full max-w-md mx-auto">
           <div className="bg-white shadow-xl rounded-xl p-8 space-y-8">
             <h1 className="text-3xl font-semibold text-gray-900">Sign in</h1>
@@ -64,7 +64,7 @@ export default function LoginPage() {
                   type="email"
                   placeholder="Email"
                   required
-                  className="w-full p-3 rounded-lg bg-white border-2 border-gray-200 focus:border-[#8B5CF6] focus:ring-0 transition-colors placeholder:text-gray-400"
+                  className="flex h-10 text-sm disabled:cursor-not-allowed disabled:opacity-50 w-full p-3 rounded-lg bg-white border-2 border-[#8B5CF6] transition-colors placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] focus:ring-opacity-50"
                 />
               </div>
               <div className="space-y-2">
@@ -74,7 +74,7 @@ export default function LoginPage() {
                   type="password"
                   placeholder="Password"
                   required
-                  className="w-full p-3 rounded-lg bg-white border-2 border-gray-200 focus:border-[#8B5CF6] focus:ring-0 transition-colors placeholder:text-gray-400"
+                  className="flex h-10 text-sm disabled:cursor-not-allowed disabled:opacity-50 w-full p-3 rounded-lg bg-white border-2 border-[#8B5CF6] transition-colors placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] focus:ring-opacity-50"
                 />
               </div>
 
@@ -112,7 +112,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:flex-1 bg-[#0B0B14] items-center justify-center p-8">
         <div className="text-center">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo_Dark-A9P5ErIaCRgbho2l8PJnyOUeGgc7n2.webp"
+            src="/logo_Dark.webp"
             alt="Haktrak Networks"
             width={400}
             height={120}
