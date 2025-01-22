@@ -19,6 +19,8 @@ export default function HomePage() {
     }
   }
 
+  const isDomain = /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/i.test(searchQuery)
+
   return (
     <div className="flex h-screen bg-[#0B0B14] text-white">
       <Sidebar />
@@ -47,20 +49,111 @@ export default function HomePage() {
           {searchResults && (
             <div className="mt-6">
               <h2 className="text-2xl font-bold mb-4">Search Results</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {isDomain && searchResults.leakixResult && (
                 <div>
                   <h3 className="text-xl font-semibold mb-2">LeakIX Results</h3>
-                  <pre className="bg-[#1a1a2e] p-4 rounded-lg overflow-auto max-h-[600px]">
-                    {JSON.stringify(searchResults.leakixResult, null, 2)}
-                  </pre>
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        {/* Table headers */}
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Host
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Port
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Protocol
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Subdomains
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Summary
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {Array.isArray(searchResults.leakixResult) ? (
+                        searchResults.leakixResult.map((result, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap">{result.host}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{result.port}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{result.protocol}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {result.subdomains && result.subdomains.join(", ")}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">{result.summary}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap">{searchResults.leakixResult.host}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">{searchResults.leakixResult.port}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">{searchResults.leakixResult.protocol}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {searchResults.leakixResult.subdomains && searchResults.leakixResult.subdomains.join(", ")}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">{searchResults.leakixResult.summary}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
+              )}
+              {!isDomain && searchResults.shodanResult && (
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Shodan Results</h3>
-                  <pre className="bg-[#1a1a2e] p-4 rounded-lg overflow-auto max-h-[600px]">
-                    {JSON.stringify(searchResults.shodanResult, null, 2)}
-                  </pre>
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          City
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Country
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          IP
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          ISP
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Ports
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Vulns
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Last Update
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Domains
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      <tr>
+                        <td className="px-6 py-4 whitespace-nowrap">{searchResults.shodanResult.city}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{searchResults.shodanResult.country_name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{searchResults.shodanResult.ip}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{searchResults.shodanResult.isp}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {searchResults.shodanResult.ports && searchResults.shodanResult.ports.join(", ")}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {searchResults.shodanResult.vulns && searchResults.shodanResult.vulns.join(", ")}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">{searchResults.shodanResult.last_update}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {searchResults.shodanResult.domains && searchResults.shodanResult.domains.join(", ")}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </main>

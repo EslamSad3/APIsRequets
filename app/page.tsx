@@ -108,7 +108,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:flex-1 bg-[#0B0B14] items-center justify-center p-8">
         <div className="text-center">
           <Image
-            src="/logo_Dark.webp"
+            src="/logo-dark.webp"
             alt="Haktrak Networks"
             width={400}
             height={120}

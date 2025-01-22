@@ -5,9 +5,32 @@ import { createContext, useContext, type ReactNode, useState } from "react"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 
+interface ShodanResult {
+  city?: string
+  country_name?: string
+  ip?: number | string
+  isp?: string
+  ports?: number[]
+  vulns?: string[]
+  last_update?: string
+  domains?: string[]
+}
+
+interface LeakixResult {
+  host?: string
+  port?: string
+  protocol?: string
+  subdomains?: string[]
+  summary?: string
+  ip?: string
+  server?: string
+  organization_name?: string
+  domain?: string
+}
+
 interface SearchResult {
-  leakixResult: any
-  shodanResult: any
+  leakixResult?: LeakixResult | LeakixResult[]
+  shodanResult?: ShodanResult
 }
 
 interface ApiContextType {
@@ -36,16 +59,13 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const login = async (email: string, password: string, keepLoggedIn: boolean) => {
     try {
-      const response = await fetch(
-        "https://apirendertest.onrender.com/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password, keepLoggedIn }),
-        }
-      );
+      const response = await fetch("https://apirendertest.onrender.com/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, keepLoggedIn }),
+      })
 
       if (!response.ok) {
         throw new Error("Invalid credentials")
@@ -81,58 +101,59 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }
 
-  const search = async (query: string) => {
-    setIsSearching(true)
-    setSearchResults(null)
+const search = async (query: string) => {
+  setIsSearching(true);
+  setSearchResults(null);
 
-    try {
-      // LeakIX API request
-      const leakixResponse = await fetch(
-        `https://leakix.net/domain/${encodeURIComponent(query)}`,
+  try {
+    let apiResponse: Response | null = null;
+
+    // Determine if the query is a domain or IP/host
+    if (
+      /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/i.test(
+        query
+      )
+    ) {
+      // Domain: Make LeakIX request
+      apiResponse = await fetch(
+        `https://leakix.net/${encodeURIComponent(query)}`,
         {
           headers: {
-            "api-key": process.env.LEAKIX_API_KEY || "",
+            "api-key": process.env.LEAKIX_API_KEY || "", // Read LeakIX API key from environment
             Accept: "application/json",
-            " Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Origin": "*",
           },
         }
       );
-
-      // Shodan API request
-      const shodanResponse = await fetch(
-        `https://api.shodan.io/shodan/host/${encodeURIComponent(query)}?key=${process.env.SHODAN_API_KEY}`,
-      )
-
-      if (!leakixResponse.ok && !shodanResponse.ok) {
-        throw new Error("Both API requests failed")
-      }
-
-      let leakixResult = null
-      let shodanResult = null
-
-      try {
-        leakixResult = await leakixResponse.json()
-      } catch (e) {
-        console.error("LeakIX API error:", e)
-      }
-
-      try {
-        shodanResult = await shodanResponse.json()
-      } catch (e) {
-        console.error("Shodan API error:", e)
-      }
-
-      setSearchResults({
-        leakixResult,
-        shodanResult,
-      })
-    } catch (error) {
-      toast.error("An error occurred during the search")
-      console.error(error)
-    } finally {
-      setIsSearching(false)
+    } else {
+      // IP/host: Make Shodan request
+      const shodanApiKey = process.env.SHODAN_API_KEY || ""; // Read Shodan API key from environment
+      apiResponse = await fetch(
+        `https://api.shodan.io/shodan/host/${encodeURIComponent(
+          query
+        )}?key=${shodanApiKey}`,
+        {
+          headers: {
+            Accept: "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
     }
+
+    if (!apiResponse || !apiResponse.ok) {
+      throw new Error("Search request failed");
+    }
+
+    const data = await apiResponse.json();
+    setSearchResults(data);
+  } catch (error) {
+    toast.error("An error occurred during the search");
+    console.error(error);
+  } finally {
+    setIsSearching(false);
   }
+};
 
   return (
     <ApiContext.Provider value={{ login, logout, checkSession, search, searchResults, isSearching }}>
