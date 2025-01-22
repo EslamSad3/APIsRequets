@@ -9,16 +9,26 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await fetch(
-      `https://api.shodan.io/shodan/host/${encodeURIComponent(query)}?key=${process.env.SHODAN_API_KEY}`,
-    )
+    const apiKey = process.env.SHODAN_API_KEY
+    if (!apiKey) {
+      console.error("Shodan API key is missing")
+      return NextResponse.json({ error: "Shodan API key is not configured" }, { status: 500 })
+    }
+
+    const response = await fetch(`https://api.shodan.io/shodan/host/${encodeURIComponent(query)}?key=${apiKey}`)
 
     if (!response.ok) {
-      console.error("Shodan API error:", await response.text())
-      return NextResponse.json({ error: "Shodan API request failed" }, { status: response.status })
+      const errorText = await response.text()
+      console.error("Shodan API error:", response.status, errorText)
+      return NextResponse.json(
+        { error: `Shodan API request failed: ${response.status} ${errorText}` },
+        { status: response.status },
+      )
     }
 
     const data = await response.json()
+    console.log("Shodan API response:", JSON.stringify(data, null, 2))
+
     const shodanResult = {
       city: data.city,
       country_name: data.country_name,

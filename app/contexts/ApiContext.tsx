@@ -106,7 +106,10 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setSearchResults(null)
 
     try {
-      const isDomain = /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/i.test(query)
+const isDomain =
+  /^(?:(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}|localhost)$/i.test(
+    query
+  );
       const apiRoute = isDomain ? "/api/leakix" : "/api/shodan"
 
       const response = await fetch(`${apiRoute}?query=${encodeURIComponent(query)}`)

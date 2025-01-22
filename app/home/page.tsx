@@ -11,11 +11,17 @@ import { Loader2 } from "lucide-react"
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const { search, searchResults, isSearching } = useApi()
+  const [error, setError] = useState<string | null>(null)
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     if (searchQuery.trim()) {
-      await search(searchQuery)
+      try {
+        await search(searchQuery)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred during the search")
+      }
     }
   }
 
@@ -45,6 +51,8 @@ export default function HomePage() {
               {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Search"}
             </Button>
           </form>
+
+          {error && <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
 
           {searchResults && (
             <div className="mt-6">
