@@ -101,59 +101,29 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }
 
-const search = async (query: string) => {
-  setIsSearching(true);
-  setSearchResults(null);
+  const search = async (query: string) => {
+    setIsSearching(true)
+    setSearchResults(null)
 
-  try {
-    let apiResponse: Response | null = null;
+    try {
+      const isDomain = /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/i.test(query)
+      const apiRoute = isDomain ? "/api/leakix" : "/api/shodan"
 
-    // Determine if the query is a domain or IP/host
-    if (
-      /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/i.test(
-        query
-      )
-    ) {
-      // Domain: Make LeakIX request
-      apiResponse = await fetch(
-        `https://leakix.net/${encodeURIComponent(query)}`,
-        {
-          headers: {
-            "api-key": process.env.LEAKIX_API_KEY || "", // Read LeakIX API key from environment
-            Accept: "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      );
-    } else {
-      // IP/host: Make Shodan request
-      const shodanApiKey = process.env.SHODAN_API_KEY || ""; // Read Shodan API key from environment
-      apiResponse = await fetch(
-        `https://api.shodan.io/shodan/host/${encodeURIComponent(
-          query
-        )}?key=${shodanApiKey}`,
-        {
-          headers: {
-            Accept: "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      );
+      const response = await fetch(`${apiRoute}?query=${encodeURIComponent(query)}`)
+
+      if (!response.ok) {
+        throw new Error("Search request failed")
+      }
+
+      const data = await response.json()
+      setSearchResults(data)
+    } catch (error) {
+      toast.error("An error occurred during the search")
+      console.error(error)
+    } finally {
+      setIsSearching(false)
     }
-
-    if (!apiResponse || !apiResponse.ok) {
-      throw new Error("Search request failed");
-    }
-
-    const data = await apiResponse.json();
-    setSearchResults(data);
-  } catch (error) {
-    toast.error("An error occurred during the search");
-    console.error(error);
-  } finally {
-    setIsSearching(false);
   }
-};
 
   return (
     <ApiContext.Provider value={{ login, logout, checkSession, search, searchResults, isSearching }}>
