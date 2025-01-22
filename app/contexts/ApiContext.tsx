@@ -42,7 +42,6 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-           " Access-Control-Allow-Origin": "*"
           },
           body: JSON.stringify({ email, password, keepLoggedIn }),
         }
@@ -88,12 +87,16 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     try {
       // LeakIX API request
-      const leakixResponse = await fetch(`https://leakix.net/domain/${encodeURIComponent(query)}`, {
-        headers: {
-          "api-key": process.env.LEAKIX_API_KEY || "",
-          Accept: "application/json",
-        },
-      })
+      const leakixResponse = await fetch(
+        `https://leakix.net/domain/${encodeURIComponent(query)}`,
+        {
+          headers: {
+            "api-key": process.env.LEAKIX_API_KEY || "",
+            Accept: "application/json",
+            " Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
 
       // Shodan API request
       const shodanResponse = await fetch(
