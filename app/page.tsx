@@ -4,16 +4,15 @@ import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Shield, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import Image from "next/image"
-import { loginUser } from "./actions/auth"
-import { useRouter } from "next/navigation"
-import toast from "react-hot-toast"
+import { useApi } from "./contexts/ApiContext"
 
 export default function LoginPage() {
   const [error, setError] = useState<string>("")
   const [isPending, startTransition] = useTransition()
-  const router = useRouter()
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false)
+  const { login } = useApi()
 
   async function handleSubmit(formData: FormData) {
     setError("")
@@ -27,17 +26,10 @@ export default function LoginPage() {
     }
 
     startTransition(async () => {
-      const result = await loginUser(formData)
-
-      if (result.error) {
-        setError(result.error)
-        toast.error(result.error)
-        return
-      }
-
-      if (result.success) {
-        toast.success("Login successful!")
-        router.push("/home")
+      try {
+        await login(email, password, keepLoggedIn)
+      } catch (error) {
+        setError("An error occurred during login")
       }
     })
   }
@@ -64,7 +56,7 @@ export default function LoginPage() {
                   type="email"
                   placeholder="Email"
                   required
-                  className="flex h-10 text-sm disabled:cursor-not-allowed disabled:opacity-50 w-full p-3 rounded-lg bg-white border-2 border-[#8B5CF6] transition-colors placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] focus:ring-opacity-50"
+                  className="flex h-10 text-sm disabled:cursor-not-allowed disabled:opacity-50 w-full p-3 rounded-lg bg-white border-2 border-[#8B5CF6] transition-colors placeholder:text-gray-400 text-gray-900 outline-none"
                 />
               </div>
               <div className="space-y-2">
@@ -74,13 +66,17 @@ export default function LoginPage() {
                   type="password"
                   placeholder="Password"
                   required
-                  className="flex h-10 text-sm disabled:cursor-not-allowed disabled:opacity-50 w-full p-3 rounded-lg bg-white border-2 border-[#8B5CF6] transition-colors placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] focus:ring-opacity-50"
+                  className="flex h-10 text-sm disabled:cursor-not-allowed disabled:opacity-50 w-full p-3 rounded-lg bg-white border-2 border-[#8B5CF6] transition-colors placeholder:text-gray-400 text-gray-900 outline-none"
                 />
               </div>
 
               <div className="flex items-center">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="remember" />
+                  <Checkbox
+                    id="remember"
+                    checked={keepLoggedIn}
+                    onCheckedChange={(checked) => setKeepLoggedIn(checked as boolean)}
+                  />
                   <label htmlFor="remember" className="text-sm text-gray-600">
                     Keep me logged in
                   </label>

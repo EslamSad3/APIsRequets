@@ -4,18 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Home, Shield, BarChart, Settings, LogOut } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { logoutUser } from "../actions/auth"
+import { useApi } from "../contexts/ApiContext"
 import toast from "react-hot-toast"
 
 export function Sidebar() {
   const router = useRouter()
+  const { logout } = useApi()
 
   const handleLogout = async () => {
-    const result = await logoutUser()
-    if (result.success) {
-      toast.success("Logged out successfully")
-      router.push("/")
-    }
+    await logout()
   }
 
   return (

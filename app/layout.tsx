@@ -3,6 +3,8 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "../components/theme-provider"
 import { Toaster } from "react-hot-toast"
+import { ApiProvider } from "./contexts/ApiContext"
+import { SessionCheck } from "./components/SessionCheck"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,8 +22,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster position="top-right" />
+          <ApiProvider>
+            <SessionCheck />
+            {children}
+            <Toaster position="top-right" />
+          </ApiProvider>
         </ThemeProvider>
       </body>
     </html>
